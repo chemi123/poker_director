@@ -13,12 +13,7 @@ type TournamentDirector struct {
 	Tables []table.Table
 }
 
-type TableRequest struct {
-	ID         int `json:"id"`
-	PlayersNum int `json:"playersnum"`
-}
-
-func (td *TournamentDirector) setTableAsRequested(tableReq TableRequest) {
+func (td *TournamentDirector) setTableAsRequested(tableReq table.TableRequest) {
 	for i, _ := range td.Tables {
 		if td.Tables[i].ID == tableReq.ID {
 			td.Tables[i].PlayersNum = tableReq.PlayersNum
@@ -42,7 +37,7 @@ func (td *TournamentDirector) ServeHTTP(w http.ResponseWriter, req *http.Request
 		return
 	}
 
-	var tableReq TableRequest
+	var tableReq table.TableRequest
 	if err = json.Unmarshal(reqBody, &tableReq); err != nil {
 		w.Write([]byte("Request Body is not a proper json format\n"))
 		return
