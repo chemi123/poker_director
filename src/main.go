@@ -1,6 +1,7 @@
 package main
 
 import (
+	// 相対パスよくないけど暫定で使う
 	"./director"
 	"net/http"
 )
