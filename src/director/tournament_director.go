@@ -4,6 +4,7 @@ import (
 	// 相対パスよくないけど暫定で使う
 	"../table"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -13,16 +14,41 @@ type TournamentDirector struct {
 	Tables []table.Table
 }
 
-func (td *TournamentDirector) setTableAsRequested(tableReq table.TableRequest) {
+// リクエストで指定されたテーブルに値をbodyのjson通りにセットする
+// もし指定のTable IDが存在しなければエラーを返す
+func (td *TournamentDirector) setTableAsRequested(tableReq table.TableRequest) error {
 	for i, _ := range td.Tables {
 		if td.Tables[i].ID == tableReq.ID {
 			td.Tables[i].PlayersNum = tableReq.PlayersNum
+			return nil
 		}
 	}
+	return errors.New("Requested Table ID does not exist")
 }
 
-func tableBalance() {
-	// table balanceするよ
+// tableBalance
+func (td *TournamentDirector) tableBalance() {
+	minTable, maxTable := &td.Tables[0], &td.Tables[0]
+
+	// TODO: 大した計算量ないからまずは愚直に計算するがこのやり方はカッコ悪いので後で効率化を図る修正をする
+	for {
+		for i, _ := range td.Tables {
+			if minTable.PlayersNum > td.Tables[i].PlayersNum {
+				minTable = &td.Tables[i]
+			}
+
+			if maxTable.PlayersNum < td.Tables[i].PlayersNum {
+				maxTable = &td.Tables[i]
+			}
+		}
+
+		if (maxTable.PlayersNum - minTable.PlayersNum) < 2 {
+			break
+		}
+
+		minTable.PlayersNum += 1
+		maxTable.PlayersNum -= 1
+	}
 }
 
 func (td *TournamentDirector) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -52,9 +78,15 @@ func (td *TournamentDirector) ServeHTTP(w http.ResponseWriter, req *http.Request
 
 		// TODO: ここでクライアント側にtableIDを返す処理が必要
 		fmt.Fprintf(w, "Your tableID is %v\n", tableID)
+	} else if len(td.Tables) > 0 {
+		if err = td.setTableAsRequested(tableReq); err != nil {
+			fmt.Fprintln(w, "Requested ID does not exist")
+			return
+		}
+		td.tableBalance()
 	} else {
-		td.setTableAsRequested(tableReq)
-		tableBalance()
+		w.Write([]byte("No table is set yet\n"))
+		return
 	}
 
 	// debug
