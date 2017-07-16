@@ -43,15 +43,15 @@ func (td *TournamentDirector) ServeHTTP(w http.ResponseWriter, req *http.Request
 		return
 	}
 
-	// TODO: tableIdを付ける規則は改めて修正する必要がある
-	//       でないと例えばtableIdが1, 2, 3, 4とあって2がクローズされた後にまたtableが追加されたら既に存在しているtableId=4が再度出来上がる
+	// TODO: tableIDを付ける規則は改めて修正する必要がある
+	//       でないと例えばtableIDが1, 2, 3, 4とあって2がクローズされた後にまたtableが追加されたら既に存在しているtableID=4が再度出来上がる
 	//       バグを仕込む可能性が高そうな箇所である
 	if tableReq.ID == 0 {
-		tableId := len(td.Tables) + 1
-		td.Tables = append(td.Tables, table.NewTable(tableId, tableReq.PlayersNum))
+		tableID := len(td.Tables) + 1
+		td.Tables = append(td.Tables, table.NewTable(tableID, tableReq.PlayersNum))
 
-		// TODO: ここでクライアント側にtableIdを返す処理が必要
-		fmt.Fprintf(w, "Your tableId is %v\n", tableId)
+		// TODO: ここでクライアント側にtableIDを返す処理が必要
+		fmt.Fprintf(w, "Your tableID is %v\n", tableID)
 	} else {
 		td.setTableAsRequested(tableReq)
 		tableBalance()
