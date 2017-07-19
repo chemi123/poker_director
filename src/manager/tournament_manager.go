@@ -1,4 +1,4 @@
-package director
+package manager
 
 import (
 	// 相対パスよくないけど暫定で使う
@@ -11,14 +11,14 @@ import (
 	"net/http"
 )
 
-type TournamentDirector struct {
+type TournamentManager struct {
 	Tables []table.Table
 }
 
 // リクエストで指定されたテーブルに値をbodyのjson通りにセットする
 // もし指定のTable IDが存在しなければエラーを返す
 // この関数が正しく動作するためにはTable IDは全てユニークでなければならない
-func (td *TournamentDirector) setTableAsRequested(tableReq request.DealerRequest) error {
+func (td *TournamentManager) setTableAsRequested(tableReq request.DealerRequest) error {
 	for i, _ := range td.Tables {
 		if td.Tables[i].ID == tableReq.ID {
 			td.Tables[i].PlayersNum = tableReq.PlayersNum
@@ -29,7 +29,7 @@ func (td *TournamentDirector) setTableAsRequested(tableReq request.DealerRequest
 }
 
 // tableBalance
-func (td *TournamentDirector) tableBalance() {
+func (td *TournamentManager) tableBalance() {
 	minTable, maxTable := &td.Tables[0], &td.Tables[0]
 
 	// TODO: 大した計算量ないからひとまずは愚直に計算する
@@ -54,7 +54,7 @@ func (td *TournamentDirector) tableBalance() {
 	}
 }
 
-func (td *TournamentDirector) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (td *TournamentManager) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		w.Write([]byte("Only takes POST request"))
 		return
