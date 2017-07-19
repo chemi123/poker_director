@@ -16,6 +16,7 @@ type TournamentDirector struct {
 
 // リクエストで指定されたテーブルに値をbodyのjson通りにセットする
 // もし指定のTable IDが存在しなければエラーを返す
+// この関数が正しく動作するためにはTable IDは全てユニークでなければならない
 func (td *TournamentDirector) setTableAsRequested(tableReq table.TableRequest) error {
 	for i, _ := range td.Tables {
 		if td.Tables[i].ID == tableReq.ID {
@@ -30,7 +31,8 @@ func (td *TournamentDirector) setTableAsRequested(tableReq table.TableRequest) e
 func (td *TournamentDirector) tableBalance() {
 	minTable, maxTable := &td.Tables[0], &td.Tables[0]
 
-	// TODO: 大した計算量ないからまずは愚直に計算するがこのやり方はカッコ悪いので後で効率化を図る修正をする
+	// TODO: 大した計算量ないからひとまずは愚直に計算する
+	//       もっと効率化はできるがやるならバグに気をつけないといけないから費用対効果としては微妙かも。十分速いし
 	for {
 		for i, _ := range td.Tables {
 			if minTable.PlayersNum > td.Tables[i].PlayersNum {
