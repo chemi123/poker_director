@@ -2,6 +2,7 @@ package director
 
 import (
 	// 相対パスよくないけど暫定で使う
+	"../request"
 	"../table"
 	"encoding/json"
 	"errors"
@@ -17,7 +18,7 @@ type TournamentDirector struct {
 // リクエストで指定されたテーブルに値をbodyのjson通りにセットする
 // もし指定のTable IDが存在しなければエラーを返す
 // この関数が正しく動作するためにはTable IDは全てユニークでなければならない
-func (td *TournamentDirector) setTableAsRequested(tableReq table.TableRequest) error {
+func (td *TournamentDirector) setTableAsRequested(tableReq request.DealerRequest) error {
 	for i, _ := range td.Tables {
 		if td.Tables[i].ID == tableReq.ID {
 			td.Tables[i].PlayersNum = tableReq.PlayersNum
@@ -65,7 +66,7 @@ func (td *TournamentDirector) ServeHTTP(w http.ResponseWriter, req *http.Request
 		return
 	}
 
-	var tableReq table.TableRequest
+	var tableReq request.DealerRequest
 	if err = json.Unmarshal(reqBody, &tableReq); err != nil {
 		w.Write([]byte("Request Body is not a proper json format\n"))
 		return
