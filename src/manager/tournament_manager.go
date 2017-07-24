@@ -13,7 +13,7 @@ import (
 type TournamentManager struct {
 	tables               []table.Table
 	tournamentDirectorID int
-	requestJson          *simplejson.Json
+	requestedJson        *simplejson.Json
 }
 
 // リクエストで指定されたテーブルに値をbodyのjson通りにセットする
@@ -69,13 +69,13 @@ func parseJsonRequest(httpReq *http.Request) (*simplejson.Json, error) {
 }
 
 func (tm *TournamentManager) handleDealerRequest(w http.ResponseWriter) {
-	tableId, err := tm.requestJson.Get("ID").Int()
+	tableId, err := tm.requestedJson.Get("ID").Int()
 	if err != nil {
 		fmt.Println("Failed to assert key \"ID\"")
 		return
 	}
 
-	playersNum, err := tm.requestJson.Get("PlayersNum").Int()
+	playersNum, err := tm.requestedJson.Get("PlayersNum").Int()
 	if err != nil {
 		fmt.Println("Failed to assert key \"PlayersNum\"")
 		return
@@ -111,13 +111,13 @@ func (tm *TournamentManager) handleTournamentDirectorRequest() {
 func (tm *TournamentManager) ServeHTTP(w http.ResponseWriter, httpReq *http.Request) {
 	// TDとDealerのAPIは統一するべきかよく考える必要がある
 	var err error
-	tm.requestJson, err = parseJsonRequest(httpReq)
+	tm.requestedJson, err = parseJsonRequest(httpReq)
 	if err != nil {
 		fmt.Fprintln(w, "Failed to parse json request")
 		return
 	}
 
-	isTdRequest, err := tm.requestJson.Get("IsTDRequest").Bool()
+	isTdRequest, err := tm.requestedJson.Get("IsTDRequest").Bool()
 	if err != nil {
 		fmt.Fprintln(w, "Failed to assert key \"IsTDRequest\"")
 	}
