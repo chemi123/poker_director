@@ -2,7 +2,7 @@ package main
 
 import (
 	// 相対パスよくないけど暫定で使う
-	"./manager"
+	"github.com/chemi123/poker_director/src/manager"
 	"net/http"
 )
 

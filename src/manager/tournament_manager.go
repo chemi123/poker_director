@@ -1,11 +1,10 @@
 package manager
 
 import (
-	// 相対パスよくないけど暫定で使う
-	"../table"
 	"errors"
 	"fmt"
 	"github.com/bitly/go-simplejson"
+	"github.com/chemi123/poker_director/src/table"
 	"io/ioutil"
 	"net/http"
 )
@@ -109,7 +108,6 @@ func (tm *TournamentManager) handleTournamentDirectorRequest() {
 }
 
 func (tm *TournamentManager) ServeHTTP(w http.ResponseWriter, httpReq *http.Request) {
-	// TDとDealerのAPIは統一するべきかよく考える必要がある
 	var err error
 	tm.requestedJson, err = parseJsonRequest(httpReq)
 	if err != nil {
