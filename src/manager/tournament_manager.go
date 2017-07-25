@@ -2,10 +2,11 @@ package manager
 
 import (
 	"errors"
-	"fmt"
+	"fmt" // for debug
 	"github.com/bitly/go-simplejson"
 	"github.com/chemi123/poker_director/src/table"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -67,16 +68,16 @@ func parseJsonRequest(httpReq *http.Request) (*simplejson.Json, error) {
 	return simplejson.NewJson(reqBody)
 }
 
-func (tm *TournamentManager) handleDealerRequest(w http.ResponseWriter) {
+func (tm *TournamentManager) handleDealerRequest() {
 	tableId, err := tm.requestedJson.Get("ID").Int()
 	if err != nil {
-		fmt.Println("Failed to assert key \"ID\"")
+		log.Println(err)
 		return
 	}
 
 	playersNum, err := tm.requestedJson.Get("PlayersNum").Int()
 	if err != nil {
-		fmt.Println("Failed to assert key \"PlayersNum\"")
+		log.Println(err)
 		return
 	}
 
@@ -88,15 +89,15 @@ func (tm *TournamentManager) handleDealerRequest(w http.ResponseWriter) {
 		tm.tables = append(tm.tables, table.NewTable(tableId, playersNum))
 
 		// TODO: ここでクライアント側にtableIdを返す処理が必要
-		fmt.Fprintf(w, "Your tableId is %v\n", tableId)
+		log.Printf("Your tableId is %v\n", tableId)
 	} else if len(tm.tables) > 0 {
 		if err = tm.setTableAsRequested(tableId, playersNum); err != nil {
-			fmt.Fprintln(w, "Requested ID does not exist")
+			log.Println(err)
 			return
 		}
 		tm.tableBalance()
 	} else {
-		w.Write([]byte("No table is set yet\n"))
+		log.Println("No table is set yet")
 		return
 	}
 }
@@ -108,22 +109,24 @@ func (tm *TournamentManager) handleTournamentDirectorRequest() {
 }
 
 func (tm *TournamentManager) ServeHTTP(w http.ResponseWriter, httpReq *http.Request) {
+	log.SetOutput(w)
 	var err error
 	tm.requestedJson, err = parseJsonRequest(httpReq)
 	if err != nil {
-		fmt.Fprintln(w, "Failed to parse json request")
+		log.Println(err)
 		return
 	}
 
 	isTdRequest, err := tm.requestedJson.Get("IsTDRequest").Bool()
 	if err != nil {
-		fmt.Fprintln(w, "Failed to assert key \"IsTDRequest\"")
+		log.Println(err)
+		return
 	}
 
 	if isTdRequest == true {
 		tm.handleTournamentDirectorRequest()
 	} else {
-		tm.handleDealerRequest(w)
+		tm.handleDealerRequest()
 	}
 
 	// debug
