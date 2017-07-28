@@ -10,10 +10,16 @@ import (
 	"net/http"
 )
 
+const (
+	PLAYERSNUMKEY string = "PlayersNum"
+	IDKEY         string = "ID"
+	ISTDREQUEST   string = "IsTDRequest"
+)
+
 type TournamentManager struct {
 	tables               []table.Table
 	tournamentDirectorID int
-	requestedJson        *simplejson.Json
+	requestedJSON        *simplejson.Json
 }
 
 // リクエストで指定されたテーブルに値をbodyのjson通りにセットする
@@ -55,7 +61,7 @@ func (tm *TournamentManager) tableBalance() {
 	}
 }
 
-func parseJsonRequest(httpReq *http.Request) (*simplejson.Json, error) {
+func parseJSONRequest(httpReq *http.Request) (*simplejson.Json, error) {
 	if httpReq.Method != http.MethodPost {
 		return nil, errors.New("Only takes POST request\n")
 	}
@@ -69,29 +75,29 @@ func parseJsonRequest(httpReq *http.Request) (*simplejson.Json, error) {
 }
 
 func (tm *TournamentManager) handleDealerRequest() {
-	tableId, err := tm.requestedJson.Get("ID").Int()
+	tableID, err := tm.requestedJSON.Get(IDKEY).Int()
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	playersNum, err := tm.requestedJson.Get("PlayersNum").Int()
+	playersNum, err := tm.requestedJSON.Get(PLAYERSNUMKEY).Int()
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	// TODO: tableIdを付ける規則は改めて修正する必要がある
-	//       でないと例えばtableIdが1, 2, 3, 4とあって2がクローズされた後にまたtableが追加されたら既に存在しているtableId=4が再度出来上がる
+	// TODO: tableIDを付ける規則は改めて修正する必要がある
+	//       でないと例えばtableIDが1, 2, 3, 4とあって2がクローズされた後にまたtableが追加されたら既に存在しているtableID=4が再度出来上がる
 	//       バグを仕込む可能性が高そうな箇所である
-	if tableId == 0 {
-		tableId = len(tm.tables) + 1
-		tm.tables = append(tm.tables, table.NewTable(tableId, playersNum))
+	if tableID == 0 {
+		tableID = len(tm.tables) + 1
+		tm.tables = append(tm.tables, table.NewTable(tableID, playersNum))
 
-		// TODO: ここでクライアント側にtableIdを返す処理が必要
-		log.Printf("Your tableId is %v\n", tableId)
+		// TODO: ここでクライアント側にtableIDを返す処理が必要
+		log.Printf("Your tableID is %v\n", tableID)
 	} else if len(tm.tables) > 0 {
-		if err = tm.setTableAsRequested(tableId, playersNum); err != nil {
+		if err = tm.setTableAsRequested(tableID, playersNum); err != nil {
 			log.Println(err)
 			return
 		}
@@ -111,13 +117,13 @@ func (tm *TournamentManager) handleTournamentDirectorRequest() {
 func (tm *TournamentManager) ServeHTTP(w http.ResponseWriter, httpReq *http.Request) {
 	log.SetOutput(w)
 	var err error
-	tm.requestedJson, err = parseJsonRequest(httpReq)
+	tm.requestedJSON, err = parseJSONRequest(httpReq)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 
-	isTdRequest, err := tm.requestedJson.Get("IsTDRequest").Bool()
+	isTdRequest, err := tm.requestedJSON.Get(ISTDREQUEST).Bool()
 	if err != nil {
 		log.Println(err)
 		return
