@@ -13,6 +13,7 @@ import (
 const (
 	PLAYERSNUMKEY string = "PlayersNum"
 	IDKEY         string = "ID"
+	NEWTABLEKEY   string = "NewTable"
 )
 
 type TournamentManager struct {
@@ -85,10 +86,16 @@ func (tm *TournamentManager) handleDealerRequest() {
 		return
 	}
 
+	newTable, err := tm.requestedJSON.Get(NEWTABLEKEY).Bool()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
 	// TODO: tableIDを付ける規則は改めて修正する必要がある
 	//       でないと例えばtableIDが1, 2, 3, 4とあって2がクローズされた後にまたtableが追加されたら既に存在しているtableID=4が再度出来上がる
 	//       バグを仕込む可能性が高そうな箇所である
-	if tableID == 0 {
+	if newTable {
 		tableID = len(tm.tables) + 1
 		tm.tables = append(tm.tables, table.NewTable(tableID, playersNum))
 
