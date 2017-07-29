@@ -13,13 +13,11 @@ import (
 const (
 	PLAYERSNUMKEY string = "PlayersNum"
 	IDKEY         string = "ID"
-	ISTDREQUEST   string = "IsTDRequest"
 )
 
 type TournamentManager struct {
-	tables               []table.Table
-	tournamentDirectorID int
-	requestedJSON        *simplejson.Json
+	tables        []table.Table
+	requestedJSON *simplejson.Json
 }
 
 // リクエストで指定されたテーブルに値をbodyのjson通りにセットする
@@ -108,12 +106,6 @@ func (tm *TournamentManager) handleDealerRequest() {
 	}
 }
 
-// TODO: これから実装
-func (tm *TournamentManager) handleTournamentDirectorRequest() {
-	if tm.tournamentDirectorID == 0 {
-	}
-}
-
 func (tm *TournamentManager) ServeHTTP(w http.ResponseWriter, httpReq *http.Request) {
 	log.SetOutput(w)
 	var err error
@@ -123,17 +115,7 @@ func (tm *TournamentManager) ServeHTTP(w http.ResponseWriter, httpReq *http.Requ
 		return
 	}
 
-	isTdRequest, err := tm.requestedJSON.Get(ISTDREQUEST).Bool()
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	if isTdRequest == true {
-		tm.handleTournamentDirectorRequest()
-	} else {
-		tm.handleDealerRequest()
-	}
+	tm.handleDealerRequest()
 
 	// debug
 	for _, v := range tm.tables {
