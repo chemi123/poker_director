@@ -34,8 +34,8 @@ func (tm *TournamentManager) setTableAsRequested(requestedTableId int, requested
 	return errors.New("Requested Table ID does not exist")
 }
 
-// tableBalance
-func (tm *TournamentManager) tableBalance() {
+// balanceTable
+func (tm *TournamentManager) balanceTable() {
 	minTable, maxTable := &tm.tables[0], &tm.tables[0]
 
 	// TODO: 大した計算量ないからひとまずは愚直に計算する
@@ -106,7 +106,7 @@ func (tm *TournamentManager) handleDealerRequest() {
 			log.Println(err)
 			return
 		}
-		tm.tableBalance()
+		tm.balanceTable()
 	} else {
 		log.Println("No table is set yet")
 		return
