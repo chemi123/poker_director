@@ -34,8 +34,10 @@ func (tm *TournamentManager) setTableAsRequested(requestedTableId int, requested
 	return errors.New("Requested Table ID does not exist")
 }
 
-func (tm *TournamentManager) balanceTable() {
+// TODO: どのテーブルがどのようにバランスされるかまでわかるようにする
+func (tm *TournamentManager) balanceTable() bool {
 	minTable, maxTable := &tm.tables[0], &tm.tables[0]
+	isBalanced := false
 
 	// TODO: 大した計算量ないからひとまずは愚直に計算する
 	//       もっと効率化はできるがやるならバグに気をつけないといけないから費用対効果としては微妙かも。十分速いし
@@ -56,7 +58,10 @@ func (tm *TournamentManager) balanceTable() {
 
 		minTable.PlayersNum += 1
 		maxTable.PlayersNum -= 1
+		isBalanced = true
 	}
+
+	return isBalanced
 }
 
 func parseJSONRequest(httpReq *http.Request) (*simplejson.Json, error) {
@@ -94,6 +99,7 @@ func (tm *TournamentManager) handleDealerRequest() {
 	// TODO: tableIDを付ける規則は改めて修正する必要がある
 	//       でないと例えばtableIDが1, 2, 3, 4とあって2がクローズされた後にまたtableが追加されたら既に存在しているtableID=4が再度出来上がる
 	//       バグを仕込む可能性が高そうな箇所である
+	isBalanced := false
 	if newTable {
 		tableID = len(tm.tables) + 1
 		tm.tables = append(tm.tables, table.NewTable(tableID, playersNum))
@@ -105,10 +111,14 @@ func (tm *TournamentManager) handleDealerRequest() {
 			log.Println(err)
 			return
 		}
-		tm.balanceTable()
+		isBalanced = tm.balanceTable()
 	} else {
 		log.Println("No table is set yet")
 		return
+	}
+
+	if isBalanced {
+		log.Println("balance table")
 	}
 }
 

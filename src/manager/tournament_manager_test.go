@@ -41,7 +41,10 @@ func TestBalanceTable(t *testing.T) {
 		table.Table{ID: 2, PlayersNum: 6},
 		table.Table{ID: 3, PlayersNum: 8}}}
 
-	tm.balanceTable()
+	isBalanced := tm.balanceTable()
+	if !isBalanced {
+		t.Fatal("tables should be balanced, but these are not")
+	}
 
 	// TODO: もっとエレガントに書く
 	if tm.tables[0].PlayersNum != 6 {
@@ -54,6 +57,11 @@ func TestBalanceTable(t *testing.T) {
 
 	if tm.tables[2].PlayersNum != 7 {
 		t.Fatal("table ID: 3 should have 7 players as a result of balanceTable. It has %s players", tm.tables[2].PlayersNum)
+	}
+
+	isBalanced = tm.balanceTable()
+	if isBalanced {
+		t.Fatal("tables should not be balanced, but these are")
 	}
 }
 
