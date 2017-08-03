@@ -1,7 +1,7 @@
 package manager
 
 import (
-	//"fmt"
+	"github.com/bitly/go-simplejson"
 	"github.com/chemi123/poker_director/src/table"
 	"net/http"
 	"testing"
@@ -57,6 +57,11 @@ func TestBalanceTable(t *testing.T) {
 	}
 }
 
-// TODO
+// TODO: JSONをパースする処理の確認しか行っていないので他の処理も確認する
 func TestHandleDealerRequest(t *testing.T) {
+	json, _ := simplejson.NewJson([]byte(`"ID":0,"PlayersNum":2,"NewTable":true}`))
+	tm := TournamentManager{requestedJSON: json}
+
+	t.Log(tm)
+	t.Log(tm.requestedJSON)
 }

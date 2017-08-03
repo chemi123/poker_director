@@ -34,7 +34,6 @@ func (tm *TournamentManager) setTableAsRequested(requestedTableId int, requested
 	return errors.New("Requested Table ID does not exist")
 }
 
-// balanceTable
 func (tm *TournamentManager) balanceTable() {
 	minTable, maxTable := &tm.tables[0], &tm.tables[0]
 
